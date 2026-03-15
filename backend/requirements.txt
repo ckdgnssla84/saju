@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+korean_lunar_calendar
+pydantic
+
+ephem
+
+python-dotenv
+
+google-generativeai
+
+gunicorn

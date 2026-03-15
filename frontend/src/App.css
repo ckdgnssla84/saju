@@ -1,0 +1,297 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
+
+:root {
+  --base: #020617;
+  --surface: #0f172a;
+  --surface-bright: rgba(30, 41, 59, 0.4);
+  --border-faint: rgba(255, 255, 255, 0.06);
+  --accent: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.3);
+  --text-main: #f8fafc;
+  --text-muted: #64748b;
+  
+  --wood: #10b981;
+  --fire: #ef4444;
+  --earth: #f59e0b;
+  --metal: #94a3b8;
+  --water: #0ea5e9;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--base);
+  color: var(--text-main);
+  font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 60px 24px;
+}
+
+header {
+  text-align: left;
+  margin-bottom: 56px;
+}
+
+header h1 {
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  margin: 0 0 12px 0;
+  padding-bottom: 4px;
+  background: linear-gradient(to bottom right, #ffffff 20%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+  word-break: keep-all;
+}
+
+header p {
+  color: var(--text-muted);
+  font-size: 1.125rem;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* Bento Grid Setup */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-faint);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+/* Input Section - Minimalist Bar */
+.input-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: flex-end;
+  background: rgba(15, 23, 42, 0.2);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-group label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+input, select {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--border-faint);
+  padding: 8px 0;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.3s ease;
+  min-width: 80px;
+}
+
+input:focus, select:focus {
+  border-color: var(--accent);
+}
+
+.calc-btn {
+  background: var(--text-main);
+  color: var(--base);
+  padding: 14px 40px;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.calc-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 20px -5px rgba(255,255,255,0.1);
+}
+
+/* Result Section - Bento Layout */
+.result-section {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .result-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Saju Chart - Elegant Vertical Strips */
+.saju-chart h2 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0 0 32px 0;
+  letter-spacing: -0.02em;
+}
+
+.pillars-container {
+  display: flex;
+  gap: 20px;
+}
+
+.pillar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.pillar-header {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.char-box {
+  width: 100%;
+  max-width: 72px;
+  aspect-ratio: 1/1.5;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+  position: relative;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+}
+
+.char-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+  border-radius: inherit;
+}
+
+.analysis-text {
+  margin-top: 40px;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  border: 1px solid var(--border-faint);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.analysis-text strong {
+  color: var(--accent);
+}
+
+/* Chat Interface - Refined AI */
+.chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+}
+
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 90%;
+}
+
+.message.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.message.bot {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.bubble {
+  padding: 16px 20px;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.user .bubble {
+  background: var(--accent);
+  color: white;
+  border-radius: 24px 24px 4px 24px;
+}
+
+.bot .bubble {
+  background: transparent;
+  padding: 0;
+  color: var(--text-main);
+}
+
+.input-area {
+  margin-top: 32px;
+  display: flex;
+  gap: 16px;
+  background: rgba(15, 23, 42, 0.3);
+  padding: 8px;
+  border-radius: 20px;
+  border: 1px solid var(--border-faint);
+}
+
+.input-area input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 12px 20px;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.input-area button {
+  background: var(--surface);
+  color: white;
+  border: 1px solid var(--border-faint);
+  border-radius: 14px;
+  padding: 0 24px;
+  font-weight: 700;
+  cursor: pointer;
+}
