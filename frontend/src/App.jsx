@@ -3,14 +3,17 @@ import SajuChart from './components/SajuChart'
 import ChatInterface from './components/ChatInterface'
 import './App.css'
 
-const API_BASE_URL = ''; // Relative path for unified hosting
+const getApiUrl = (path) => {
+  const base = window.location.origin;
+  return `${base}${path}`;
+};
 
 function App() {
   // ... rest of the code
   const handleCalculate = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/calculate', {
+      const response = await fetch(getApiUrl('/api/calculate'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

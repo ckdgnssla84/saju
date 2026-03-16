@@ -17,9 +17,11 @@ const ChatInterface = ({ sajuData }) => {
     setInput('');
     setIsLoading(true);
 
+    const apiPath = window.location.origin + '/api/chat';
+
     try {
       console.log('Sending message to backend...', input);
-      const response = await fetch('/api/chat', {
+      const response = await fetch(apiPath, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input, saju_data: sajuData })
