@@ -3,17 +3,19 @@ import SajuChart from './components/SajuChart'
 import ChatInterface from './components/ChatInterface'
 import './App.css'
 
-const getApiUrl = (path) => {
-  const base = window.location.origin;
-  return `${base}${path}`;
+const getApiUrl = (endpoint) => {
+  const origin = window.location.origin;
+  return `${origin}${endpoint}`;
 };
 
 function App() {
-  // ... rest of the code
+  // ... code
   const handleCalculate = async () => {
     setLoading(true);
     try {
-      const response = await fetch(getApiUrl('/api/calculate'), {
+      const url = getApiUrl('/api/calculate');
+      console.log('Fetching from:', url);
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)

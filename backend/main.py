@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -13,7 +13,7 @@ load_dotenv()
 
 app = FastAPI()
 
-# CORS Setup - Flexible for deployment
+# CORS Setup
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -31,11 +31,8 @@ if GEMINI_API_KEY and "AIza" in GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-1.5-flash')
-        print("Gemini API Configured (gemini-1.5-flash)")
     except Exception as e:
-        print(f"Gemini Config Error: {e}")
-else:
-    print("Gemini API Key NOT FOUND. Running in mock mode.")
+        print(f"Gemini Error: {e}")
 
 class CalculateRequest(BaseModel):
     year: int
@@ -49,9 +46,9 @@ class ChatRequest(BaseModel):
     message: str
     saju_data: dict = None
 
-# --- API ROUTES (Define FIRST) ---
+# 1. API ROUTES (MUST COME BEFORE STATIC FILES)
 @app.post("/api/calculate")
-def calculate_saju(req: CalculateRequest):
+async def calculate_saju(req: CalculateRequest):
     try:
         result = calculator.compute(req.year, req.month, req.day, req.hour, req.minute, req.gender)
         return result
@@ -62,54 +59,42 @@ def calculate_saju(req: CalculateRequest):
 async def chat_with_fortune_teller(req: ChatRequest):
     user_msg = req.message
     saju = req.saju_data
+    if not saju: return {"response": "사주 데이터가 없습니다."}
     
-    if not saju:
-        return {"response": "먼저 분석 시작 버튼을 눌러주세요."}
-
-    context = f"""
-    User's Saju Chart:
-    - Year: {saju['year']['ganji']} ({saju['year']['element']})
-    - Month: {saju['month']['ganji']} ({saju['month']['element']})
-    - Day: {saju['day']['ganji']} ({saju['day']['element']}) - This is the Day Master (The User).
-    - Hour: {saju['hour']['ganji']} ({saju['hour']['element']})
-    
-    The user asks: "{user_msg}"
-    
-    Act as a wise, mystical Korean Fortune Teller. 
-    Interpret the user's question based on their Day Master ({saju['day']['element']}) and the overall balance of elements.
-    Use polite but mystical Korean language.
-    """
-
+    context = f"User Saju: {saju}. Ask: {user_msg}. Act as Saju expert."
     if model:
         try:
             response = model.generate_content(context)
             return {"response": response.text}
         except Exception as e:
-            return {"response": f"AI 통신 오류 발생: {str(e)}"}
-    else:
-        day_master = saju.get('day', {}).get('element', 'Unknown')
-        return {"response": f"[Mock Mode] 당신은 {day_master}의 기운을 타고났습니다."}
+            return {"response": f"AI Error: {str(e)}"}
+    return {"response": "Mock Response"}
 
-# --- STATIC FILE SERVING (Define LAST) ---
+# 2. STATIC FILES (MOUNT AT THE VERY END)
 BASE_DIR = Path(__file__).resolve().parent
 static_dir = BASE_DIR / "static"
 
-print(f"Checking for static directory at: {static_dir}")
 if static_dir.exists():
-    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
+    # Use standard mount for files
+    app.mount("/assets", StaticFiles(directory=str(static_dir / "assets")), name="assets")
     
+    # Catch-all for React index.html
     @app.get("/{full_path:path}")
-    async def serve_react_app(full_path: str):
-        index_file = static_dir / "index.html"
-        if index_file.exists():
-            return FileResponse(index_file)
-        return {"error": "index.html not found"}
+    async def serve_frontend(full_path: str):
+        if full_path.startswith("api"): # Prevent API hijacking
+             return None 
+        index_path = static_dir / "index.html"
+        return FileResponse(index_path)
+    
+    @app.get("/")
+    async def serve_root():
+        return FileResponse(static_dir / "index.html")
 else:
     @app.get("/")
-    def read_root():
-        return {"message": "Saju API is running (Frontend static files missing)"}
+    def no_static():
+        return {"error": "Frontend static files not found"}
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port)
