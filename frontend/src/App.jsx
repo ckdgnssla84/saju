@@ -3,7 +3,7 @@ import SajuChart from './components/SajuChart'
 import ChatInterface from './components/ChatInterface'
 import './App.css'
 
-const API_BASE_URL = ''; // Relative path for Vercel
+const API_BASE_URL = ''; // Relative path for unified hosting
 
 function App() {
   // ... rest of the code

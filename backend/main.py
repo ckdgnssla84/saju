@@ -90,20 +90,28 @@ async def chat_with_fortune_teller(req: ChatRequest):
         return {"response": f"[Mock Mode] 당신은 {day_master}의 기운을 타고났습니다."}
 
 # ---------------------------------------------------------------------
-# Static File Hosting (Server Frontend from the same domain)
+# Static File Hosting (Serve Frontend from the same domain)
 # ---------------------------------------------------------------------
-static_dir = Path(__file__).parent / "static"
+BASE_DIR = Path(__file__).resolve().parent
+static_dir = BASE_DIR / "static"
+
+print(f"Checking for static directory at: {static_dir}")
 if static_dir.exists():
-    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
+    print("Static directory found! Mounting...")
+    app.mount("/", StaticFiles(directory=str(static_dir), html=True), name="static")
     
     @app.get("/{full_path:path}")
     async def serve_react_app(full_path: str):
-        # Fallback to index.html for any frontend routes (SPA)
-        return FileResponse(static_dir / "index.html")
+        # Fallback to index.html for SPA routing
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        return {"error": "index.html not found in static directory"}
 else:
+    print(f"Static directory NOT found at {static_dir}")
     @app.get("/")
     def read_root():
-        return {"message": "Saju API is running (Static folder not found)"}
+        return {"message": "Saju API is running (Frontend static files missing)"}
 
 if __name__ == "__main__":
     import uvicorn

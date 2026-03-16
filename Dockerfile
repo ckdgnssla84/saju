@@ -1,27 +1,32 @@
-# 1. Frontend Build Stage
+# Stage 1: Build Frontend
 FROM node:20-alpine AS frontend-builder
-WORKDIR /frontend
+WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
-COPY frontend/ ./
+COPY frontend/ .
 RUN npm run build
 
-# 2. Final Run Stage (Python)
+# Stage 2: Final Runtime
 FROM python:3.11-slim
 WORKDIR /app
 
-# Install dependencies
+# Install Python dependencies
 COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN pip install gunicorn uvicorn
 
-# Copy code
-COPY backend/ ./
-COPY --from=frontend-builder /frontend/dist ./static
+# Copy Python code (main.py, calculator.py)
+COPY backend/ .
 
-# Expose port and start
-ENV PORT=8080
-EXPOSE 8080
+# Copy built frontend assets into 'static' directory within the app root
+COPY --from=frontend-builder /app/frontend/dist ./static
 
-# Start command
-CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:8080"]
+# Ensure the static directory exists and is populated
+RUN ls -la /app/static
+
+# Set environment variables
+ENV PORT=10000
+EXPOSE 10000
+
+# Start server
+CMD ["gunicorn", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "main:app", "--bind", "0.0.0.0:10000"]
