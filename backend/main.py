@@ -64,30 +64,30 @@ async def chat_with_fortune_teller(req: ChatRequest):
     except Exception as e:
         return {"response": f"AI Error: {str(e)}"}
 
-# --- 2. FRONTEND ---
+# --- 2. FRONTEND (The Bulletproof Fix) ---
 BASE_DIR = Path(__file__).resolve().parent
 static_dir = BASE_DIR / "static"
 
 if static_dir.exists():
-    # Mount /assets for JS/CSS files explicitly
-    assets_path = static_dir / "assets"
-    if assets_path.exists():
-        app.mount("/assets", StaticFiles(directory=str(assets_path)), name="assets")
-    
-    # Catch-all for files and index.html
+    # Serve assets first with highest priority
+    assets_dir = static_dir / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    # Catch-all for other static files and index.html
     @app.get("/{rest_of_path:path}")
-    async def serve_all(rest_of_path: str):
-        # 1. If it's a file in static_dir (e.g. favicon.ico), serve it
+    async def serve_frontend(rest_of_path: str):
+        # 1. If requesting a specific file like favicon.svg
         file_path = static_dir / rest_of_path
         if file_path.is_file():
             return FileResponse(file_path)
         
-        # 2. Otherwise serve index.html
+        # 2. Always fallback to index.html for React Router / Blank page fix
         return FileResponse(static_dir / "index.html")
 else:
     @app.get("/")
-    def no_frontend():
-        return {"message": "Static folder missing"}
+    def no_static():
+        return {"message": "Static folder not found at " + str(static_dir)}
 
 if __name__ == "__main__":
     import uvicorn
