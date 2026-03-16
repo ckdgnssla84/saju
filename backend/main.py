@@ -46,7 +46,7 @@ class ChatRequest(BaseModel):
     message: str
     saju_data: dict = None
 
-# --- API ---
+# --- 1. API ---
 @app.post("/api/calculate")
 async def calculate_saju(req: CalculateRequest):
     try:
@@ -62,40 +62,32 @@ async def chat_with_fortune_teller(req: ChatRequest):
         response = model.generate_content(f"Saju: {req.saju_data}. User: {req.message}")
         return {"response": response.text}
     except Exception as e:
-        return {"response": f"오류: {str(e)}"}
+        return {"response": f"AI Error: {str(e)}"}
 
-# --- FRONTEND SERVING (The fix for blank screen) ---
+# --- 2. FRONTEND ---
 BASE_DIR = Path(__file__).resolve().parent
 static_dir = BASE_DIR / "static"
 
 if static_dir.exists():
-    # 1. Mount assets folder specifically
-    assets_dir = static_dir / "assets"
-    if assets_dir.exists():
-        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
-
-    # 2. Serve static files (favicon, etc)
-    @app.get("/{file_path:path}")
-    async def serve_static(file_path: str):
-        # If the requested path exists as a file in static_dir, serve it
-        full_path = static_dir / file_path
-        if full_path.is_file():
-            return FileResponse(full_path)
+    # Mount /assets for JS/CSS files explicitly
+    assets_path = static_dir / "assets"
+    if assets_path.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_path)), name="assets")
+    
+    # Catch-all for files and index.html
+    @app.get("/{rest_of_path:path}")
+    async def serve_all(rest_of_path: str):
+        # 1. If it's a file in static_dir (e.g. favicon.ico), serve it
+        file_path = static_dir / rest_of_path
+        if file_path.is_file():
+            return FileResponse(file_path)
         
-        # If it's an API call we missed, return 404
-        if file_path.startswith("api/"):
-            return {"error": "Not Found"}
-            
-        # Otherwise, always serve index.html (for React Router)
-        return FileResponse(static_dir / "index.html")
-
-    @app.get("/")
-    async def root():
+        # 2. Otherwise serve index.html
         return FileResponse(static_dir / "index.html")
 else:
     @app.get("/")
     def no_frontend():
-        return {"message": "Backend OK, but Frontend files are missing."}
+        return {"message": "Static folder missing"}
 
 if __name__ == "__main__":
     import uvicorn
