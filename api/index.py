@@ -27,10 +27,10 @@ app.add_middleware(
 
 calculator = SajuCalculator()
 
-# Gemini Setup
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCbTZD1m3RHMo-k-zC493Ug6pVr_OavTmg"
+# Gemini Setup (API 키는 환경변수로만 받는다. 코드에 기본값을 두지 말 것)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 model = None
-if GEMINI_API_KEY and "AIza" in GEMINI_API_KEY:
+if GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         # We'll use gemini-1.5-flash as default for speed
@@ -72,6 +72,9 @@ async def chat_with_fortune_teller(req: ChatRequest):
     
     if not saju:
         return {"response": "먼저 분석 시작 버튼을 눌러주세요."}
+
+    if model is None:
+        return {"response": "AI 상담 기능이 설정되지 않았습니다. 서버에 GEMINI_API_KEY 환경변수를 등록해 주세요."}
 
     context = f"""
     User's Saju Chart:

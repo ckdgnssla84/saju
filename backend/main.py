@@ -24,15 +24,17 @@ app.add_middleware(
 
 calculator = SajuCalculator()
 
-# Gemini
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or "AIzaSyCbTZD1m3RHMo-k-zC493Ug6pVr_OavTmg"
+# Gemini (API 키는 환경변수로만 받는다. 코드에 기본값을 두지 말 것)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 model = None
-if GEMINI_API_KEY and "AIza" in GEMINI_API_KEY:
+if GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel('gemini-1.5-flash')
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"Gemini Config Error: {e}")
+else:
+    print("GEMINI_API_KEY is not set. AI chat is disabled.")
 
 class CalculateRequest(BaseModel):
     year: int
@@ -56,8 +58,10 @@ async def calculate_saju(req: CalculateRequest):
 
 @app.post("/api/chat")
 async def chat_with_fortune_teller(req: ChatRequest):
-    if not model or not req.saju_data:
+    if not req.saju_data:
         return {"response": "상담을 위해 먼저 사주를 분석해주세요."}
+    if model is None:
+        return {"response": "AI 상담 기능이 설정되지 않았습니다. 서버에 GEMINI_API_KEY 환경변수를 등록해 주세요."}
     try:
         response = model.generate_content(f"Saju: {req.saju_data}. User: {req.message}")
         return {"response": response.text}
